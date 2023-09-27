@@ -4,6 +4,8 @@ from bp.map import map_bp
 from bp.user import user_bp
 import os
 import random
+import util.map_util as mu
+import util.weather_util as wu
 
 app = Flask(__name__)
 app.secret_key = 'qwert12345'
@@ -27,6 +29,31 @@ def before_first_request():     # 최초 1회 실행
     addr = '서울시 영등포구'
     session['quote'] = quote
     session['addr'] = addr
+
+# AJAX 요청 처리
+
+
+@app.route('/change_quote')
+def change_quote():
+    global quote
+    quote = random.sample(quotes, 1)[0]
+    session['quote'] = quote
+    return quote
+
+
+@app.route('/change_addr')
+def change_addr():
+    addr = request.args.get('addr')
+    session['addr'] = addr
+    return addr
+
+
+@app.route('/weather')
+def weather():
+    addr = request.args.get('addr')
+    lat, lng = mu.get_coord(app.static_folder, addr + '청')
+    html = wu.get_weather(app.static_folder, lat, lng)
+    return html
 
 
 @app.route('/')
